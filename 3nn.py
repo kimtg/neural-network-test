@@ -7,6 +7,11 @@ def nonlin(x,deriv=False):
 
 def relu(x,deriv=False):
     if deriv:
+        return np.where(x < 0, 0, 1)
+    return np.maximum(x, 0)
+
+def leaky_relu(x,deriv=False):
+    if deriv:
         return np.where(x < 0, 0.01, 1)
     return np.maximum(x, 0.01 * x)
 
@@ -31,11 +36,11 @@ np.random.seed(1)
 syn0 = 2*np.random.random((3,4)) - 1
 syn1 = 2*np.random.random((4,1)) - 1
 
-for j in range(6000000):
+for j in range(60000):
 
     # Feed forward through layers 0, 1, and 2
     l0 = X
-    l1 = relu(np.dot(l0,syn0))
+    l1 = leaky_relu(np.dot(l0,syn0))
     l2 = nonlin(np.dot(l1,syn1))
 
     # how much did we miss the target value?
@@ -53,7 +58,7 @@ for j in range(6000000):
     
     # in what direction is the target l1?
     # were we really sure? if so, don't change too much.
-    l1_delta = l1_error * relu(l1,deriv=True)
+    l1_delta = l1_error * leaky_relu(l1,deriv=True)
 
     syn1 += l1.T.dot(l2_delta)
     syn0 += l0.T.dot(l1_delta)
