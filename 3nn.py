@@ -7,8 +7,13 @@ def nonlin(x,deriv=False):
 
 def relu(x,deriv=False):
     if deriv:
-        return np.sign(np.maximum(x, 0))
-    return np.maximum(x, 0)
+        return 1
+    return np.maximum(x, 0.01 * x)
+
+def tanh(x,deriv=False):
+    if deriv:
+        return 1 - np.tanh(x) * np.tanh(x)
+    return np.tanh(x)
     
 X = np.array([[0,0,1],
             [0,1,1],
@@ -26,17 +31,17 @@ np.random.seed(1)
 syn0 = 2*np.random.random((3,4)) - 1
 syn1 = 2*np.random.random((4,1)) - 1
 
-for j in range(60000):
+for j in range(6000000):
 
-	# Feed forward through layers 0, 1, and 2
+    # Feed forward through layers 0, 1, and 2
     l0 = X
-    l1 = relu(np.dot(l0,syn0))
+    l1 = tanh(np.dot(l0,syn0))
     l2 = nonlin(np.dot(l1,syn1))
 
     # how much did we miss the target value?
     l2_error = y - l2
     
-    if (j% 10000) == 0:
+    if (j % 10000) == 0:
         print("Error:" + str(np.mean(np.abs(l2_error))))
         
     # in what direction is the target value?
@@ -48,7 +53,7 @@ for j in range(60000):
     
     # in what direction is the target l1?
     # were we really sure? if so, don't change too much.
-    l1_delta = l1_error * relu(l1,deriv=True)
+    l1_delta = l1_error * tanh(l1,deriv=True)
 
     syn1 += l1.T.dot(l2_delta)
     syn0 += l0.T.dot(l1_delta)
